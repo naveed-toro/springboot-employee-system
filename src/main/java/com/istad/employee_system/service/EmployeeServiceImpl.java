@@ -1,5 +1,6 @@
 package com.istad.employee_system.service;
 
+import com.istad.employee_system.dto.EmployeeDto;
 import com.istad.employee_system.exception.ResourceNotFoundException;
 import com.istad.employee_system.model.Employee;
 import com.istad.employee_system.repository.EmployeeRepository;
@@ -58,9 +59,29 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.delete(employee);
     }
 
-    // --- نیا فیچر: پیجینیشن اور سرچ کا اصل لاجک ---
+    // --- یہ ہمارا نیا میپر (Mapper) ہے جو دیگچی (Entity) سے ڈیٹا نکال کر پلیٹ (DTO) میں ڈالے گا ---
+    private EmployeeDto mapToDto(Employee employee) {
+        EmployeeDto dto = new EmployeeDto();
+        dto.setId(employee.getId());
+        
+        // نام جوڑ کر ایک کر دیا (Full Name)
+        dto.setFullName(employee.getFirstName() + " " + employee.getLastName());
+        dto.setEmail(employee.getEmail());
+        
+        // اگر ڈیپارٹمنٹ موجود ہے تو اس کا صرف نام نکال لو
+        if (employee.getDepartment() != null) {
+            dto.setDepartmentName(employee.getDepartment().getDepartmentName());
+        }
+        // اگر پوزیشن موجود ہے تو اس کا صرف نام نکال لو
+        if (employee.getPosition() != null) {
+            dto.setPositionName(employee.getPosition().getPositionName());
+        }
+        return dto;
+    }
+
+    // --- نیا فیچر: پیجینیشن اور سرچ کا اصل لاجک (اب DTO کے ساتھ) ---
     @Override
-    public Page<Employee> getEmployeesByPaginationAndSearch(int pageNo, int pageSize, String sortField, String sortDirection, String keyword) {
+    public Page<EmployeeDto> getEmployeesByPaginationAndSearch(int pageNo, int pageSize, String sortField, String sortDirection, String keyword) {
         
         // 1. ترتیب (Sorting) سیٹ کریں: سیدھی (ASC) یا الٹی (DESC)
         Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? 
@@ -69,11 +90,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 2. پیج (Pageable) سیٹ کریں (سپرنگ بوٹ میں پیج 0 سے شروع ہوتا ہے، اس لیے ہم نے pageNo - 1 کیا ہے)
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
 
+        Page<Employee> employees;
+        
         // 3. اگر کوئی کی ورڈ (keyword) دیا گیا ہے تو سرچ کریں، ورنہ سارے لائیں
         if (keyword != null && !keyword.trim().isEmpty()) {
-            return employeeRepository.searchEmployees(keyword, pageable);
+            employees = employeeRepository.searchEmployees(keyword, pageable);
+        } else {
+            employees = employeeRepository.findAll(pageable);
         }
         
-        return employeeRepository.findAll(pageable);
+        // 4. یہ لائن ہر ایمپلائی کو باری باری mapToDto والے فنکشن سے گزار کر پلیٹ میں سجا دے گی
+        return employees.map(this::mapToDto);
     }
 }
