@@ -1,8 +1,13 @@
 package com.istad.employee_system.service;
 
+import com.istad.employee_system.dto.DepartmentDto;
 import com.istad.employee_system.exception.ResourceNotFoundException;
 import com.istad.employee_system.model.Department;
 import com.istad.employee_system.repository.DepartmentRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,5 +60,38 @@ public class DepartmentServiceImpl implements DepartmentService {
             new ResourceNotFoundException("معذرت! ڈیلیٹ کرنے کے لیے مطلوبہ ڈیپارٹمنٹ نہیں مل سکا: " + id));
             
         departmentRepository.deleteById(id);
+    }
+
+    // --- یہ ہمارا نیا میپر (Mapper) ہے جو دیگچی (Entity) سے ڈیٹا نکال کر پلیٹ (DTO) میں ڈالے گا ---
+    private DepartmentDto mapToDto(Department department) {
+        DepartmentDto dto = new DepartmentDto();
+        dto.setId(department.getId());
+        dto.setDepartmentName(department.getDepartmentName());
+        dto.setDepartmentDescription(department.getDepartmentDescription());
+        return dto;
+    }
+
+    // --- 6. نیا فیچر: پیجینیشن اور سرچ کا اصل لاجک (اب DTO کے ساتھ) ---
+    @Override
+    public Page<DepartmentDto> getDepartmentsByPaginationAndSearch(int pageNo, int pageSize, String sortField, String sortDirection, String keyword) {
+        
+        // 1. ترتیب (Sorting) سیٹ کریں: سیدھی (ASC) یا الٹی (DESC)
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? 
+                Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+
+        // 2. پیج (Pageable) سیٹ کریں (سپرنگ بوٹ میں پیج 0 سے شروع ہوتا ہے، اس لیے ہم نے pageNo - 1 کیا ہے)
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+
+        Page<Department> departments;
+        
+        // 3. اگر کوئی کی ورڈ (keyword) دیا گیا ہے تو سرچ کریں، ورنہ سارے لائیں
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            departments = departmentRepository.searchDepartments(keyword, pageable);
+        } else {
+            departments = departmentRepository.findAll(pageable);
+        }
+        
+        // 4. یہ لائن ہر ڈیپارٹمنٹ کو باری باری mapToDto والے فنکشن سے گزار کر پلیٹ میں سجا دے گی
+        return departments.map(this::mapToDto);
     }
 }

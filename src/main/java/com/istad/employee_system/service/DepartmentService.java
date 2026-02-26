@@ -1,9 +1,12 @@
 package com.istad.employee_system.service;
 
+import com.istad.employee_system.dto.DepartmentDto;
 import com.istad.employee_system.model.Department;
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface DepartmentService {
+    
     // 1. نیا ڈیپارٹمنٹ بنانا (POST)
     Department createDepartment(Department department);
     
@@ -18,4 +21,7 @@ public interface DepartmentService {
     
     // 5. ڈیلیٹ کرنا (DELETE)
     void deleteDepartment(Long id);
+
+    // 6. نیا فیچر: پیجینیشن اور سرچ (اب DepartmentDto کی پلیٹ کے ساتھ)
+    Page<DepartmentDto> getDepartmentsByPaginationAndSearch(int pageNo, int pageSize, String sortField, String sortDirection, String keyword);
 }
