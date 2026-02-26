@@ -1,21 +1,18 @@
 package com.istad.employee_system.service;
 
 import com.istad.employee_system.model.Employee;
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface EmployeeService {
-    // 1. نیا ایمپلائی محفوظ کریں
-    Employee saveEmployee(Employee employee);
-
-    // 2. تمام ایمپلائیز کی لسٹ دیکھیں
+    
+    // پرانے بنیادی کام (CRUD)
+    Employee createEmployee(Employee employee);
     List<Employee> getAllEmployees();
-
-    // 3. کسی ایک ایمپلائی کو ID سے ڈھونڈیں
     Employee getEmployeeById(Long id);
-
-    // 4. ایمپلائی کا ڈیٹا اپ ڈیٹ کریں
-    Employee updateEmployee(Employee employee, Long id);
-
-    // 5. ایمپلائی کو ڈیلیٹ کریں
+    Employee updateEmployee(Long id, Employee employeeDetails);
     void deleteEmployee(Long id);
+
+    // نیا فیچر: پیجینیشن (Pagination)، سارٹنگ (Sorting) اور سرچ (Search)
+    Page<Employee> getEmployeesByPaginationAndSearch(int pageNo, int pageSize, String sortField, String sortDirection, String keyword);
 }
