@@ -1,5 +1,7 @@
 package com.istad.employee_system.controller;
 
+import com.istad.employee_system.dto.EmployeeDto;
+import com.istad.employee_system.payload.ApiResponse;
 import com.istad.employee_system.model.Employee;
 import com.istad.employee_system.service.EmployeeService;
 import org.springframework.data.domain.Page;
@@ -51,16 +53,25 @@ public class EmployeeController {
         return new ResponseEntity<>("Employee deleted successfully!", HttpStatus.OK);
     }
 
-    // --- نیا فیچر: پیجینیشن، سارٹنگ اور سرچ ---
+    // --- نیا فیچر: پیجینیشن، سارٹنگ اور سرچ (اب DTO اور ApiResponse کی پلیٹ کے ساتھ) ---
     @GetMapping("/page")
-    public ResponseEntity<Page<Employee>> getEmployeesWithPaginationAndSearch(
+    public ResponseEntity<ApiResponse<Page<EmployeeDto>>> getEmployeesWithPaginationAndSearch(
             @RequestParam(defaultValue = "1") int pageNo,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "id") String sortField,
             @RequestParam(defaultValue = "ASC") String sortDirection,
             @RequestParam(required = false) String keyword) {
 
-        Page<Employee> page = employeeService.getEmployeesByPaginationAndSearch(pageNo, pageSize, sortField, sortDirection, keyword);
-        return ResponseEntity.ok(page);
+        // 1. سروس سے اب Employee کی بجائے EmployeeDto (پلیٹ) ملے گی
+        Page<EmployeeDto> pageData = employeeService.getEmployeesByPaginationAndSearch(pageNo, pageSize, sortField, sortDirection, keyword);
+        
+        // 2. ڈیٹا کو ApiResponse (بل/رسید) کے ڈبے میں پیک کریں
+        ApiResponse<Page<EmployeeDto>> response = new ApiResponse<>(
+                "200 OK",
+                "Get Employees Successfully",
+                pageData
+        );
+        
+        return ResponseEntity.ok(response);
     }
 }
