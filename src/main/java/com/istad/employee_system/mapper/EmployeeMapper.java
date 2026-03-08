@@ -4,8 +4,11 @@ import com.istad.employee_system.dto.EmployeeDto;
 import com.istad.employee_system.model.Employee;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+// جدید طریقہ استعمال کرتے ہوئے وارننگز کو ختم کرنے کی پالیسی شامل کر دی گئی ہے
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EmployeeMapper {
 
     // Entity سے DTO (Record) میں تبدیل کرنے کا طریقہ
