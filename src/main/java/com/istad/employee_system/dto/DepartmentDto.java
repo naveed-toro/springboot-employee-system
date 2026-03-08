@@ -1,46 +1,14 @@
 package com.istad.employee_system.dto;
 
-public class DepartmentDto {
+import jakarta.validation.constraints.NotBlank;
 
-    private Long id;
-    
-    private String departmentName;
-    
-    private String departmentDescription;
-
-    // خالی کنسٹرکٹر
-    public DepartmentDto() {
-    }
-
-    // پیرامیٹر والا کنسٹرکٹر
-    public DepartmentDto(Long id, String departmentName, String departmentDescription) {
-        this.id = id;
-        this.departmentName = departmentName;
-        this.departmentDescription = departmentDescription;
-    }
-
-    // --- Getters and Setters ---
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    public String getDepartmentDescription() {
-        return departmentDescription;
-    }
-
-    public void setDepartmentDescription(String departmentDescription) {
-        this.departmentDescription = departmentDescription;
-    }
+// پرانے کوڈ کے مطابق Department کا نیا record
+public record DepartmentDto(
+        Long id,
+        
+        @NotBlank(message = "Department Name cannot be blank!")
+        String departmentName,
+        
+        String departmentDescription
+) {
 }
